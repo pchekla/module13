@@ -1,72 +1,85 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
-namespace task1;
-
-class Program
+namespace Task1
 {
-    /// <summary>
-    /// Точка входа в программу
-    /// Программа считывает путь к текстовому файлу, считывает его содержимое и разбивает на слова.
-    /// Затем измеряет время вставки слов в List<T> и LinkedList<T>.
-    /// Выводит результаты в консоль.
-    /// </summary>
-    /// <param name="args"></param>
-    static void Main(string[] args)
+    class Program
     {
-        string filePath;
-        
         /// <summary>
-        /// Считывание пути к файлу
-        /// Пока не будет введен существующий путь к файлу, программа будет запрашивать его у пользователя.
+        /// Точка входа в программу
+        /// Поиск файла по относительному пути и сравнение производительности List<T> и LinkedList<T> при вставке
         /// </summary>
-        while (true)
+        /// <param name="args">Аргументы командной строки</param>
+        /// <returns>Код возврата</returns>
+        /// <remarks>Для запуска программы необходимо указать относительный путь к файлу</remarks>
+        static void Main(string[] args)
         {
-            Console.WriteLine("Введите полный путь к текстовому файлу, пример: '/home/user/Загрузки/Text1.txt'");
-            filePath = Console.ReadLine();
-            
-            // Проверка, существует ли файл
-            if (File.Exists(filePath))
+            string relativePath = "Text1.txt"; // Указываем путь относительно директории проекта
+
+            // Путь к файлу с проверкой
+            string filePath = GetFilePath(relativePath);
+
+            // Если файл найден, запускаем метод для проверки производительности
+            if (filePath != null)
             {
-                break; // Прерываем цикл, если файл найден
+                Console.WriteLine($"Файл найден по пути: {filePath}");
+                ComparePerformance(filePath);
             }
-            else
+        }
+
+        /// <summary>
+        /// Метод для поиска файла с циклом запроса пути
+        /// Если файл не найден, запрашивает путь к файлу заново
+        /// </summary>
+        /// <param name="relativePath">Относительный путь к файлу</param>
+        /// <returns>Полный путь к файлу</returns>
+        static string GetFilePath(string relativePath)
+        {
+            string projectDirectory = Directory.GetCurrentDirectory();
+            string fullPath = Path.Combine(projectDirectory, relativePath);
+
+            while (!File.Exists(fullPath))
             {
-                Console.WriteLine($"Файл не найден: {filePath}. Пожалуйста, попробуйте снова.");
+                Console.WriteLine($"Файл не найден по пути: {fullPath}");
+                Console.Write("Пожалуйста, введите относительный путь к файлу заново: ");
+                relativePath = Console.ReadLine() ?? string.Empty;
+
+                fullPath = Path.Combine(projectDirectory, relativePath);
             }
-        }
 
-        // Считываем содержимое файла и разбиваем его на слова
-        string[] words = File.ReadAllText(filePath).Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            return fullPath;
+        }
 
         /// <summary>
-        /// Измерение времени вставки в List<T>
+        /// Метод для сравнения производительности List<T> и LinkedList<T> при вставке
         /// </summary>
-        /// <typeparam name="T">Тип элементов коллекции</typeparam>
-        /// <param name="words">Массив слов, которые будут вставлены в коллекцию</param>
-        /// <returns>Время вставки слов в List<T></returns>
-        var list = new List<string>();
-        Stopwatch listStopwatch = Stopwatch.StartNew();
-        foreach (var word in words)
+        /// <param name="filePath"></param>
+        static void ComparePerformance(string filePath)
         {
-            list.Add(word);
-        }
-        listStopwatch.Stop();
-        Console.WriteLine($"Время вставки для List<T>: {listStopwatch.ElapsedMilliseconds} мс");
 
-        // Измерение времени вставки в LinkedList<T>
-        /// <summary>
-        /// Измерение времени вставки в LinkedList<T>
-        /// </summary>
-        /// <typeparam name="T">Тип элементов коллекции</typeparam>
-        /// <param name="words">Массив слов, которые будут вставлены в коллекцию</param>
-        /// <returns>Время вставки слов в LinkedList<T></returns>
-        var linkedList = new LinkedList<string>();
-        Stopwatch linkedListStopwatch = Stopwatch.StartNew();
-        foreach (var word in words)
-        {
-            linkedList.AddLast(word);
+            string[] words = File.ReadAllText(filePath).Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Измерение времени вставки в List<T>
+            var list = new List<string>();
+            Stopwatch listStopwatch = Stopwatch.StartNew();
+            foreach (var word in words)
+            {
+                list.Add(word);
+            }
+            listStopwatch.Stop();
+            Console.WriteLine($"Время вставки для List<T>: {listStopwatch.ElapsedMilliseconds} мс");
+
+            // Измерение времени вставки в LinkedList<T>
+            var linkedList = new LinkedList<string>();
+            Stopwatch linkedListStopwatch = Stopwatch.StartNew();
+            foreach (var word in words)
+            {
+                linkedList.AddLast(word);
+            }
+            linkedListStopwatch.Stop();
+            Console.WriteLine($"Время вставки для LinkedList<T>: {linkedListStopwatch.ElapsedMilliseconds} мс");
         }
-        linkedListStopwatch.Stop();
-        Console.WriteLine($"Время вставки для LinkedList<T>: {linkedListStopwatch.ElapsedMilliseconds} мс");
     }
 }
