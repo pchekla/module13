@@ -14,7 +14,8 @@ class Program
     static void Main(string[] args)
     {
         // Относительный путь к файлу в корне проекта
-        string relativePath = "Text1.txt"; // Указываем путь относительно директории проекта
+        string relativePath = "../Text1.txt"; // Указываем путь относительно директории Task1 или Task2
+
 
         // Получаем полный путь к файлу
         string filePath = GetFilePath(relativePath);
@@ -35,6 +36,9 @@ class Program
         // Получаем полный путь на основе текущего каталога и относительного пути
         string projectDirectory = Directory.GetCurrentDirectory();
         string fullPath = Path.Combine(projectDirectory, relativePath);
+
+        fullPath = Path.GetFullPath(fullPath);
+
 
         // Проверяем, существует ли файл по относительному пути
         if (File.Exists(fullPath))
